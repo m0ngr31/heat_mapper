@@ -1,0 +1,87 @@
+<div class="row card-spacer" id="cards">
+  <div class="col s12">
+    <div id="slider" class="card">
+      <div>
+        <div class="card-content">
+          <span class="black-text card-title">Let's get started</span>
+          <p>Welcome to Heat Mapper! I'm going to help you travel across the US, giving you an easy and visual way to stay legal with your concealed weapon.</p>
+        </div>
+        <div class="card-action">
+          <a class="btn btn-flat waves-effect waves-cyan light-blue white-text" id="states-btn">Let's go</a>
+        </div>
+      </div>
+      <div>
+        <div class="card-content">
+          <span class="black-text card-title">Select your permit(s)</span>
+          <div class="row">
+            <div class="col s9"> 
+              <div class="input-field">
+                <label style="position:inherit; top:0em">States</label>
+                <select class="browser-default" id="state-select">
+                  <option value="" disabled selected>Choose your state</option>
+                  <%= options_from_collection_for_select(State.all, :name, :name) %>
+                </select>
+              </div>
+            </div>
+            <div class="col s3">
+              <div class="resident-checkbox">
+                <input type="checkbox" id="nonresident" />
+                <label for="nonresident">Non-resident</label>
+              </div>
+            </div>
+          </div>
+          <div class="row"> 
+            <div class="col s10">
+              <span id="chips"><br/></span>
+            </div>
+            <div class="col s2">
+              <a class="pull-right btn-floating btn-large waves-effect waves-light red" id="add-state"><i class="material-icons">add</i></a>
+            </div>
+          </div>
+        </div>
+        <div class="card-action">
+          <a class="btn btn-flat waves-effect waves-cyan light-blue white-text" id="route-btn">Route</a>
+        </div>
+      </div>
+      <div>
+        <div class="card-content">
+          <span class="black-text card-title">Choose your Departing and Desination cities</span>
+          <div class="row">
+            <div class="input-field col s12">
+              <input id="departing_city" type="text" class="validate">
+              <label for="departing_city">Departing City</label>
+            </div>
+          </div>
+          <div class="row">
+            <div class="input-field col s12">
+              <input id="destination_city" type="text" class="validate">
+              <label for="destination_city">Destination City</label>
+            </div>
+          </div>
+        </div>
+        <div class="card-action">
+          <a class="btn btn-flat waves-effect waves-cyan light-blue white-text" id="back-btn">Previous</a>
+          <a class="btn btn-flat waves-effect waves-cyan light-blue white-text" id="maps-btn">Map it!</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row loading-spacer" id="loading">
+  <div class="preloader-wrapper big active">
+    <div class="spinner-layer spinner-red-only">
+      <div class="circle-clipper left">
+        <div class="circle"></div>
+      </div><div class="gap-patch">
+        <div class="circle"></div>
+      </div><div class="circle-clipper right">
+        <div class="circle"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= javascript_tag do %>
+  states = <%= raw State.all.to_json %>
+<% end %>

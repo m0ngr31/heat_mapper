@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HeatMapper</title>
+  <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/css/materialize.min.css" rel="stylesheet">
+  <script src="//maps.google.com/maps/api/js?v=3.13&amp;sensor=false&amp;libraries=geometry" type="text/javascript"></script>
+  <script src='//google-maps-utility-library-v3.googlecode.com/svn/tags/markerclustererplus/2.0.14/src/markerclusterer_packed.js' type='text/javascript'></script>
+  <script src="//code.jquery.com/jquery-2.1.1.min.js" type="text/javascript"></script>
+  <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js" type="text/javascript"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery.ba-bbq/1.2.1/jquery.ba-bbq.min.js" type="text/javascript"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/materialize/0.97.1/js/materialize.min.js" type="text/javascript"></script>
+  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+  <%= csrf_meta_tags %>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+<body>
+  <nav>
+    <div class="nav-wrapper">
+      <a href="#" class="brand-logo thin condensed light">Heat Mapper</a>
+      <ul id="nav-mobile" class="right hide-on-med-and-down">
+        <li><a class="pointer">Change Info</a></li>
+      </ul>
+    </div>
+  </nav>
+  <main class="container">
+    <div id="map"></div>
+    <div class="page-content">
+      <%= yield %>
+    </div>
+  </main>
+</body>
+</html>

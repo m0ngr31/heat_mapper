@@ -1,0 +1,46 @@
+//@import "materialize";
+
+nav .nav-wrapper {
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
+#map {
+  height: 100%;
+  width: 100%;
+  left: 0;
+  position: absolute;
+  top: 64px;
+  margin-bottom: -64px;
+  z-index: -1;  
+}
+
+.card-spacer {
+  margin-top:64px;
+}
+
+.loading-spacer {
+  margin-top:192px;
+  text-align: center;
+}
+
+.card.large .card-content {
+  height: auto;
+}
+
+.pull-right {
+  float: right!important;
+}
+
+.resident-checkbox {
+  margin-top: 3em;
+}
+
+.chip {
+  margin-top: 3px;
+  margin-right: 3px;
+}
+
+.pointer {
+  cursor:pointer;
+}
