@@ -15,6 +15,7 @@ $(document).ready ->
   sudoSlider = $("#slider").sudoSlider(options)
 
   selectedStates = []
+  travelableStates = []
   state = {}
 
   $("select").material_select()
@@ -71,17 +72,29 @@ $(document).ready ->
 
   showChips = ->
     htmlText = ""
+    travelableStates = []
 
     if selectedStates.length > 0
       $("#route-btn").removeClass "disabled"
       _.each selectedStates, (state) ->
         htmlText += "<div class='chip'>" + state.name
-        htmlText += (if state.nonresident then " Non-resident" else "")
+
+        stateFull = _.find(states,
+          name: state.name
+        )
+
+        if state.nonresident
+          htmlText += " Non-resident"
+          travelableStates = _.union travelableStates, stateFull.nonresidentrec
+        else
+          travelableStates = _.union travelableStates, stateFull.residentrec
+
         htmlText += "<i class='material-icons' onclick=\"removeState(\'" + state.name + "\')\">close</i></div>"
     else
       htmlText = "<br/>"
       $("#route-btn").addClass "disabled"
 
+    travelableStates = _.uniq travelableStates
     $("#chips").html htmlText
 
   @removeState = (stateName) ->
@@ -90,16 +103,59 @@ $(document).ready ->
 
     showChips()
 
+  findBestRoute = (routes) ->
+    bestRouteId = 0
+    numOfBadStates = 0;
+
+    _.each routes, (route, index) ->
+      highlightedStates = []
+      starting = route.legs[0].start_address
+
+      if starting.substr(starting.length - 3) is "USA"
+        starting = starting.replace /[0-9]/g, ""
+        starting = starting.replace /\s/g, ""
+        starting = starting.substring(starting.indexOf(",") + 1)
+        stateAbbv = starting.substr 0, starting.indexOf(",")
+
+        firstState = _.find(states,
+          abbv: stateAbbv
+        )
+
+        if firstState
+          highlightedStates.push firstState.name
+
+        _.each route.legs[0].steps, (step) ->
+          isEntering = step.instructions.search("Entering ")
+          manyPassing = (step.instructions.match(/Passing through /g) or []).length
+          manyPassing2 = (step.instructions.match(/'Passing through '/g) or []).length
+
+          if isEntering > -1
+            indexState = isEntering + 9
+            startingString = step.instructions.substring(indexState)
+            indexEnd = startingString.search("</div>")
+            stateName = startingString.substring(0, indexEnd)
+            highlightedStates.push stateName
+
+          #console.log "1: " + manyPassing
+          #console.log "2: " + manyPassing2
+
+      console.log _.uniq highlightedStates
+
+    return routes[0]
+
   calcRoute = ->
     origin = $("#departing_city").val()
     destination = $("#destination_city").val()
     request =
       origin: origin
       destination: destination
+      provideRouteAlternatives: true
       travelMode: google.maps.TravelMode.DRIVING
 
     directionsService.route request, (response, status) ->
       if status is google.maps.DirectionsStatus.OK
+        if response.routes.length > 1
+          response.routes[0] = findBestRoute response.routes
         directionsDisplay.setDirections response
         console.log response
         $("#loading").hide()
