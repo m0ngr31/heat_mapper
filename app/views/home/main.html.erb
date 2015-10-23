@@ -5,6 +5,10 @@
         <div class="card-content">
           <span class="black-text card-title">Let's get started</span>
           <p>Welcome to Heat Mapper! I'm going to help you travel across the US, giving you an easy and visual way to stay legal with your concealed weapon.</p>
+          <br>
+          <p>Given a search for directions between two cities, this app will look at all possible routes and find the one that will be best for whatever permits you have. If you don't like what it finds, just click and drag anywhere on the route and move it to something that will work for you!</p>
+          <br>
+          <p>If a state is red, your permit(s) don't have reciprocity there. If a state is blue, you are good to go.</p>
         </div>
         <div class="card-action">
           <a class="btn btn-flat waves-effect waves-cyan light-blue white-text" id="states-btn">Let's go</a>
@@ -19,7 +23,7 @@
                 <label style="position:inherit; top:0em">States</label>
                 <select class="browser-default" id="state-select">
                   <option value="" disabled selected>Choose your state</option>
-                  <%= options_from_collection_for_select(State.all, :name, :name) %>
+                  <%= options_from_collection_for_select(State.order("name ASC").all, :name, :name) %>
                 </select>
               </div>
             </div>
@@ -62,6 +66,19 @@
         <div class="card-action">
           <a class="btn btn-flat waves-effect waves-cyan light-blue white-text" id="back-btn">Previous</a>
           <a class="btn btn-flat waves-effect waves-cyan light-blue white-text" id="maps-btn">Map it!</a>
+        </div>
+      </div>
+      <div>
+        <div class="card-content">
+          <span class="black-text card-title">Help</span>
+          <p>Welcome to Heat Mapper! I'm going to help you travel across the US, giving you an easy and visual way to stay legal with your concealed weapon.</p>
+          <br>
+          <p>Given a search for directions between two cities, this app will look at all possible routes and find the one that will be best for whatever permits you have. If you don't like what it finds, just click and drag anywhere on the route and move it to something that will work for you!</p>
+          <br>
+          <p>If a state is red, your permit(s) don't have reciprocity there. If a state is blue, you are good to go.</p>
+        </div>
+        <div class="card-action">
+          <a class="btn btn-flat waves-effect waves-cyan light-blue white-text" id="help-btn">Got it!</a>
         </div>
       </div>
     </div>

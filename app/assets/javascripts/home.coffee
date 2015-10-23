@@ -9,13 +9,16 @@ $(document).ready ->
     autoWidth: false
     autoHeight: true
     continous: false
-    history:true
-    numericText:['intro', 'states', 'route']
+    history: true
+    useCSS: true
+    speed: "normal"
+    numericText: ['into', 'states', 'route', 'help']
 
   sudoSlider = $("#slider").sudoSlider(options)
 
   selectedStates = []
   travelableStates = []
+  polygons = []
   state = {}
 
   $("select").material_select()
@@ -58,6 +61,9 @@ $(document).ready ->
 
   $("#back-btn").click ->
     sudoSlider.goToSlide('prev')
+
+  $("#help-btn").click ->
+    window.location.hash = "#route"
 
   $("#maps-btn").click ->
     unless selectedStates.length > 0
@@ -103,45 +109,91 @@ $(document).ready ->
 
     showChips()
 
+  getStatesFromDirections = (route) ->
+    highlightedStates = []
+    starting = route.legs[0].start_address
+
+    if starting.substr(starting.length - 3) is "USA"
+      starting = starting.replace /[0-9]/g, ""
+      starting = starting.replace /\s/g, ""
+      starting = starting.substr 0, starting.lastIndexOf(",")
+      stateAbbv = starting.substring(starting.lastIndexOf(",") + 1)
+
+      firstState = _.find(states, (state) ->
+        state.abbv is stateAbbv or state.name is stateAbbv
+      )
+
+      if firstState
+        highlightedStates.push firstState.name
+
+    _.each route.legs[0].steps, (step) ->
+      isEntering = step.instructions.search("Entering ")
+      isPassing = step.instructions.search("Passing through ")
+      isEnteringUSA = step.instructions.search("Entering the United States of America ")
+
+      if isEntering > -1
+        indexState = isEntering + 9
+        startingString = step.instructions.substring(indexState)
+        indexEnd = startingString.search("</div>")
+        stateName = startingString.substring(0, indexEnd)
+        highlightedStates.push stateName
+
+      if isEnteringUSA > -1
+        indexState3 = isEntering + 39
+        startingString3 = step.instructions.substring(indexState3)
+        indexEnd3 = startingString3.search("\\)")
+        stateName3 = startingString3.substring(0, indexEnd3)
+        highlightedStates.push stateName3      
+
+      if isPassing > -1
+        indexState2 = isPassing + 16
+        startingString2 = step.instructions.substring(indexState2)
+        indexEnd2 = startingString2.search("</div>")
+        stateName2 = startingString2.substring(0, indexEnd2)
+        stateName2 = stateName2.trim()
+        if stateName2.indexOf(",") isnt -1
+          count2 = 0
+          
+          i = 0
+          while i < stateName2.length
+            count2++  if stateName2.charAt(i) is ","
+            i++
+
+          z = 0
+          while z < count2
+            stateTemp = stateName2.substring(0, stateName2.indexOf(","))
+            stateName2 = stateName2.substring(stateName2.indexOf(",") + 2)
+            highlightedStates.push stateTemp
+            z++
+          highlightedStates.push stateName2
+        else
+          highlightedStates.push stateName2
+      
+    highlightedStates = _.uniq highlightedStates
+    routeBadStates = _.difference(highlightedStates, travelableStates)
+    routeGoodStates = _.difference(highlightedStates, routeBadStates)
+
+    obj =
+      allStates: highlightedStates
+      badStates: routeBadStates
+      goodStates: routeGoodStates
+
+    return obj
+
   findBestRoute = (routes) ->
     bestRouteId = 0
     numOfBadStates = 0;
 
     _.each routes, (route, index) ->
-      highlightedStates = []
-      starting = route.legs[0].start_address
+      states = getStatesFromDirections(route)
 
-      if starting.substr(starting.length - 3) is "USA"
-        starting = starting.replace /[0-9]/g, ""
-        starting = starting.replace /\s/g, ""
-        starting = starting.substring(starting.indexOf(",") + 1)
-        stateAbbv = starting.substr 0, starting.indexOf(",")
+      numOfBadStates = states.badStates.length if index is 0
 
-        firstState = _.find(states,
-          abbv: stateAbbv
-        )
+      if states.badStates.length < numOfBadStates
+        numOfBadStates = states.badStates.length
+        bestRouteId = index
 
-        if firstState
-          highlightedStates.push firstState.name
-
-        _.each route.legs[0].steps, (step) ->
-          isEntering = step.instructions.search("Entering ")
-          manyPassing = (step.instructions.match(/Passing through /g) or []).length
-          manyPassing2 = (step.instructions.match(/'Passing through '/g) or []).length
-
-          if isEntering > -1
-            indexState = isEntering + 9
-            startingString = step.instructions.substring(indexState)
-            indexEnd = startingString.search("</div>")
-            stateName = startingString.substring(0, indexEnd)
-            highlightedStates.push stateName
-
-          #console.log "1: " + manyPassing
-          #console.log "2: " + manyPassing2
-
-      console.log _.uniq highlightedStates
-
-    return routes[0]
+    return routes[bestRouteId]
 
   calcRoute = ->
     origin = $("#departing_city").val()
@@ -156,11 +208,56 @@ $(document).ready ->
       if status is google.maps.DirectionsStatus.OK
         if response.routes.length > 1
           response.routes[0] = findBestRoute response.routes
+
         directionsDisplay.setDirections response
-        console.log response
         $("#loading").hide()
       else
         $("#loading").hide()
         $("#cards").show()
         $("#nav-mobile").hide()
         Materialize.toast "Could not find a route. Please try again", 3000, "rounded orange darken-2"
+
+  highlightStates = (response) ->
+    statesObj = getStatesFromDirections(response.routes[0])
+
+    _.each polygons, (state) ->
+      state.setMap null
+
+    polygons= []
+
+    _.each statesObj.goodStates, (state) ->
+      stateFull = _.find(states,
+        name: state
+      )
+
+      if stateFull
+        statePolygon = handler.addPolygon(
+          stateFull.point,
+          strokeColor: '#2185c5'
+          strokeOpacity: 0.8
+          strokeWeight: 2
+          fillColor: '#2185c5'
+          fillOpacity: 0.35
+        )
+
+        polygons.push statePolygon
+
+    _.each statesObj.badStates, (state) ->
+      stateFull = _.find(states,
+        name: state
+      )
+
+      if stateFull
+        statePolygon = handler.addPolygon(
+          stateFull.point,
+          strokeColor: '#FF0000'
+          strokeOpacity: 0.8
+          strokeWeight: 2
+          fillColor: '#FF0000'
+          fillOpacity: 0.35
+        )
+
+        polygons.push statePolygon
+
+  google.maps.event.addListener directionsDisplay, "directions_changed", ->
+    highlightStates directionsDisplay.directions

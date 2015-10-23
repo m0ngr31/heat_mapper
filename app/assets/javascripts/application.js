@@ -19,6 +19,8 @@
 //= require lodash
 //= require jquery.sudoSlider.min.js
 
+
+//Stole this from SO:::
 $(document).ready(function() {
   $("#nav-mobile").hide();
 
@@ -26,6 +28,13 @@ $(document).ready(function() {
     $("#cards").show();
     $("#nav-mobile").hide();
     $("#loading").hide();
+  });
+
+  $("#help").click(function() {
+    $("#cards").show();
+    $("#nav-mobile").hide();
+    $("#loading").hide();
+    window.location.hash = "#help";
   });
 });
 
